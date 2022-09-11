@@ -9,6 +9,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Rigidbody2D playerRigidbody;
     [SerializeField] Collider2D playerCollider;
     [SerializeField] float movementSpeed;
+    [SerializeField] float bulletCount;
+    [SerializeField] private float waitTime;
+    [SerializeField] public float waitForSeconds = 5f;
     [SerializeField] Transform target;
     [SerializeField] Animator animator;
     [Space]
@@ -23,10 +26,10 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         animator = GetComponentInChildren<Animator>();
+        waitTime = Time.time + waitForSeconds;
     }
     void Update()
     {
-        Debug.Log(movement);
         PlayerInput();
         RotateWeapon();
         RotateSprite();
@@ -37,6 +40,32 @@ public class PlayerController : MonoBehaviour
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
         Animate();
+
+        if (bulletCount <= 0)
+        {
+            if (Time.time > waitTime)
+            {
+                waitTime = Time.time + waitForSeconds;
+                bulletCount = 1;
+            }
+        }
+        else
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                bulletCount = 0;
+                gameObject.GetComponentInChildren<Gun>().Shoot();
+            }
+        }
+
+        if (Input.anyKey)
+        {
+            Time.timeScale = 1.0f;
+        }
+        else
+        {
+            Time.timeScale = 0.7f;
+        }
     }
 
     void FixedUpdate()
@@ -71,10 +100,12 @@ public class PlayerController : MonoBehaviour
     {
         if (movement != Vector2.zero)
         {
-            animator.SetTrigger("Walk");
+            animator.SetBool("IsWalking", true);
             animator.SetFloat("BlendX", movement.x);
             animator.SetFloat("BlendY", movement.y);
         }
+        else
+            animator.SetBool("IsWalking", false);
     }
     void Flip()
     {
@@ -83,5 +114,4 @@ public class PlayerController : MonoBehaviour
         transform.localScale = tmpScale;
         facingRight = !facingRight;
     }
-
 }
