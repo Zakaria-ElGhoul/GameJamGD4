@@ -13,13 +13,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float waitTime;
     [SerializeField] public float waitForSeconds = 5f;
     [SerializeField] Transform target;
+    [SerializeField] Transform inventoryTransform;
+    [SerializeField] Vector3 offset;
     [SerializeField] Animator animator;
     [Space]
-
-    [Header("Dodging mechanic // werkt nog niet")]
-    [SerializeField] float dodgeSpeed = 60000;
-    [SerializeField] float dodgeTime = 0.5f;
-    [SerializeField] Coroutine dodging;
 
     Vector2 movement;
     bool facingRight = true;
@@ -80,11 +77,11 @@ public class PlayerController : MonoBehaviour
 
         if (mousePos.x < transform.position.x - 1 && facingRight)
         {
-            //Flip();
+            Flip();
         }
         else if (mousePos.x > transform.position.x + 1 && !facingRight)
         {
-            //Flip();
+            Flip();
         }
     }
 
@@ -109,9 +106,9 @@ public class PlayerController : MonoBehaviour
     }
     void Flip()
     {
-        Vector3 tmpScale = transform.localScale;
-        tmpScale.x = -tmpScale.x;
-        transform.localScale = tmpScale;
+        Vector2 temporaryPos = inventoryTransform.localPosition + offset;
+        temporaryPos.x = -temporaryPos.x;
+        inventoryTransform.localPosition = temporaryPos;
         facingRight = !facingRight;
     }
 }

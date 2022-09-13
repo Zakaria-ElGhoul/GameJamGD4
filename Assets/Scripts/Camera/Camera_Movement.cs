@@ -28,10 +28,14 @@ public class Camera_Movement : MonoBehaviour
         mousePos = CaptureMousePos();
         shakeOffset = UpdateShake();
         target = UpdateTargetPos();
-        UpdateCameraPosition();
+
         Shake(shakeVector, 10f, 1f);
     }
 
+    void LateUpdate()
+    {
+        UpdateCameraPosition();
+    }
 
     Vector3 CaptureMousePos()
     {
