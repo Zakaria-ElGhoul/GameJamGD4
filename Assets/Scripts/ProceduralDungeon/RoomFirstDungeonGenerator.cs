@@ -6,15 +6,16 @@ using Random = UnityEngine.Random;
 
 public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 {
-    [SerializeField]
-    private int minRoomWidth = 4, minRoomHeight = 4;
-    [SerializeField]
-    private int dungeonWidth = 20, dungeonHeight = 20;
+    [SerializeField] private int minRoomWidth = 4, minRoomHeight = 4;
+    [SerializeField] private int dungeonWidth = 20, dungeonHeight = 20;
     [SerializeField]
     [Range(0,10)]
-    private int offset = 1;
-    [SerializeField]
-    private bool randomWalkRooms = false;
+    private int offset = 5;
+    [SerializeField] private bool randomWalkRooms = false;
+    [SerializeField] private GameObject cam;
+    [SerializeField] private float camOffset;
+    [SerializeField] private GameObject player;
+    [SerializeField] private GameObject endPoint;
 
     protected override void RunProceduralGeneration()
     {
@@ -58,9 +59,20 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             var roomBounds = roomsList[i];
             var roomCenter = new Vector2Int(Mathf.RoundToInt(roomBounds.center.x), Mathf.RoundToInt(roomBounds.center.y));
             var roomFloor = RunRandomWalk(randomWalkParameters, roomCenter);
+
+            if (roomsList[i] == roomsList[^1])
+            {
+                endPoint.transform.position = new Vector3(roomCenter.x, roomCenter.y, 0);
+            }
+            else if (roomsList[i] == roomsList[1])
+            {
+                player.transform.position = new Vector3(roomCenter.x, roomCenter.y, 0);
+                cam.transform.position = new Vector3(roomCenter.x, roomCenter.y, camOffset);
+            }
+
             foreach (var position in roomFloor)
             {
-                if(position.x >= (roomBounds.xMin + offset) && position.x <= (roomBounds.xMax - offset) && position.y >= (roomBounds.yMin - offset) && position.y <= (roomBounds.yMax - offset))
+                if (position.x >= (roomBounds.xMin + offset) && position.x <= (roomBounds.xMax - offset) && position.y >= (roomBounds.yMin - offset) && position.y <= (roomBounds.yMax - offset))
                 {
                     floor.Add(position);
                 }
@@ -108,7 +120,8 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             if (destination.x > position.x)
             {
                 position += Vector2Int.right;
-            }else if(destination.x < position.x)
+            }
+            else if(destination.x < position.x)
             {
                 position += Vector2Int.left;
             }
@@ -143,7 +156,22 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
                 for (int row = offset; row < room.size.y - offset; row++)
                 {
                     Vector2Int position = (Vector2Int)room.min + new Vector2Int(col, row);
+
                     floor.Add(position);
+                    for (int i = 0; i < roomsList.Count; i++)
+                    {
+                        var roomBounds = roomsList[i];
+                        var roomCenter = new Vector2Int(Mathf.RoundToInt(roomBounds.center.x), Mathf.RoundToInt(roomBounds.center.y));
+                        if (roomsList[i] == roomsList[^1])
+                        {
+                            endPoint.transform.position = new Vector3(roomCenter.x, roomCenter.y, 0);
+                        }
+                        else if (roomsList[i] == roomsList[1])
+                        {
+                            player.transform.position = new Vector3(roomCenter.x, roomCenter.y, 0);
+                            cam.transform.position = new Vector3(roomCenter.x, roomCenter.y, camOffset);
+                        }
+                    }
                 }
             }
         }

@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
 {
 
     [Header("Player Variables")]
+    [SerializeField] Sprite playerSprite;
     [SerializeField] Rigidbody2D playerRigidbody;
     [SerializeField] Collider2D playerCollider;
     [SerializeField] float movementSpeed;
@@ -16,7 +17,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform inventoryTransform;
     [SerializeField] Vector3 offset;
     [SerializeField] Animator animator;
-    [Space]
 
     Vector2 movement;
     bool facingRight = true;
@@ -36,7 +36,6 @@ public class PlayerController : MonoBehaviour
     {
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
-        Animate();
 
         if (bulletCount <= 0)
         {
@@ -63,6 +62,8 @@ public class PlayerController : MonoBehaviour
         {
             Time.timeScale = 0.7f;
         }
+
+        Animate();
     }
 
     void FixedUpdate()
@@ -75,11 +76,11 @@ public class PlayerController : MonoBehaviour
         Vector3 mousePos = Input.mousePosition;
         mousePos = Camera.main.ScreenToWorldPoint(mousePos);
 
-        if (mousePos.x < transform.position.x - 1 && facingRight)
+        if (mousePos.x < transform.position.x && facingRight)
         {
             Flip();
         }
-        else if (mousePos.x > transform.position.x + 1 && !facingRight)
+        else if (mousePos.x > transform.position.x && !facingRight)
         {
             Flip();
         }
@@ -98,12 +99,16 @@ public class PlayerController : MonoBehaviour
         if (movement != Vector2.zero)
         {
             animator.SetBool("IsWalking", true);
-            animator.SetFloat("BlendX", movement.x);
-            animator.SetFloat("BlendY", movement.y);
+
         }
         else
+        {
             animator.SetBool("IsWalking", false);
+        }
+        animator.SetFloat("BlendX",Camera.main.ScreenToViewportPoint(Input.mousePosition).x);
+        animator.SetFloat("BlendY",Camera.main.ScreenToViewportPoint(Input.mousePosition).y);
     }
+
     void Flip()
     {
         Vector2 temporaryPos = inventoryTransform.localPosition + offset;

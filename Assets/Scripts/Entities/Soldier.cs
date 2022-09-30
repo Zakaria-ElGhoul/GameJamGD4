@@ -27,4 +27,12 @@ public class Soldier : Entity
     {
         return base.hasDied();
     }
+    public override void ChasePlayer()
+    {
+        base.ChasePlayer();
+    }
+    public override void Attack()
+    {
+        base.Attack();
+    }
 }

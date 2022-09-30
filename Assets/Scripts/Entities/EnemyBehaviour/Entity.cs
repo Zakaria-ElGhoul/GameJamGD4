@@ -15,11 +15,18 @@ public class Entity : MonoBehaviour
 
     [SerializeField] private GameObject currentTarget;
 
-    [SerializeField] private float attackRange = 3f;
-    [SerializeField] private float maxRange = 12f;
+    [SerializeField] private float attackRange;
+    [SerializeField] private float maxRange;
 
-    [SerializeField] private float health = 100f;
-    [SerializeField] private float fleeHealth = 10f;
+    [SerializeField] private float health;
+    [SerializeField] private float fleeHealth;
+
+    [SerializeField] private float speed;
+
+    [SerializeField] private Enemy_ScriptableObj enemyScriptableObject;
+
+    [SerializeField] GameObject bulletPrefab;
+    [SerializeField] float bulletSpeed;
 
     private RangeChecker rangeChecker;
 
@@ -27,11 +34,26 @@ public class Entity : MonoBehaviour
     {
         rangeChecker = GetComponent<RangeChecker>();
         currentTarget = GameObject.FindWithTag("Player");
+        SetObjReference();
+    }
+    public void SetObjReference()
+    {
+        attackRange = enemyScriptableObject.attackRange;
+        maxRange = enemyScriptableObject.maxRange;
+
+        health = enemyScriptableObject.health;
+        fleeHealth = enemyScriptableObject.fleeHealth;
     }
 
     // Update is called once per frame
-   void Update()
+    void Update()
     {
+        attackRange = enemyScriptableObject.attackRange;
+        maxRange = enemyScriptableObject.maxRange;
+
+        health = enemyScriptableObject.health;
+        fleeHealth = enemyScriptableObject.fleeHealth;
+
         currentState = state();
         Debug.Log("State: " + currentState);
 
@@ -89,8 +111,20 @@ public class Entity : MonoBehaviour
     {
         return health <= fleeHealth;
     }
+
     public virtual bool hasDied()
     {
         return health <= 0;
+    }
+
+    public virtual void ChasePlayer()
+    {
+        transform.position = Vector2.MoveTowards(transform.position, currentTarget.transform.position, speed * Time.deltaTime);
+    }
+
+    public virtual void Attack()
+    {
+        GameObject bullet = Instantiate(bulletPrefab, transform.position, currentTarget.transform.rotation);
+        bullet.GetComponent<Rigidbody2D>().AddForce(currentTarget.transform.forward * bulletSpeed, ForceMode2D.Impulse);
     }
 }
