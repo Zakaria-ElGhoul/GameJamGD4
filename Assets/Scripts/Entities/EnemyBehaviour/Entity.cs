@@ -25,8 +25,15 @@ public class Entity : MonoBehaviour
 
     [SerializeField] private Enemy_ScriptableObj enemyScriptableObject;
 
-    [SerializeField] GameObject bulletPrefab;
+    [SerializeField] GameObject gunPrefab;
+    [SerializeField] Transform firePoint;
+
+    [SerializeField] float waitTime;
+    [SerializeField] float waitForSeconds;
+    [SerializeField] float bulletCount;
     [SerializeField] float bulletSpeed;
+
+    [SerializeField] GameObject bulletPrefab;
 
     private RangeChecker rangeChecker;
 
@@ -54,7 +61,7 @@ public class Entity : MonoBehaviour
         health = enemyScriptableObject.health;
         fleeHealth = enemyScriptableObject.fleeHealth;
 
-        currentState = state();
+        currentState = state;
         Debug.Log("State: " + currentState);
 
         switch (currentState)
@@ -63,7 +70,21 @@ public class Entity : MonoBehaviour
                 fleeState?.Invoke();
                 break;
             case EnemyStates.Attack:
-                AttackState?.Invoke();
+                RotateWeapon();
+
+                if (bulletCount <= 0)
+                {
+                    if (Time.time > waitTime)
+                    {
+                        waitTime = Time.time + waitForSeconds;
+                        bulletCount = 1;
+                    }
+                }
+                else
+                {
+                        bulletCount = 0;
+                        AttackState?.Invoke();
+                }
                 break;
             case EnemyStates.Chase:
                 ChaseState?.Invoke();
@@ -74,28 +95,31 @@ public class Entity : MonoBehaviour
         }
     }
 
-    public virtual bool isTargetInAttackRange()
-    {
-        return rangeChecker.distanceWithTarget(currentTarget) < attackRange;
-    }
+    public virtual bool isTargetInAttackRange => rangeChecker.distanceWithTarget(currentTarget) < attackRange;
 
-    public virtual EnemyStates state()
+    public virtual EnemyStates state
     {
-        if (rangeChecker.isInRange(currentTarget, maxRange))
+        get
         {
-            return fightStates();
+            if (rangeChecker.isInRange(currentTarget, maxRange))
+            {
+                return fightStates;
+            }
+            return EnemyStates.Idle;
         }
-        return EnemyStates.Idle;
     }
 
-    public virtual EnemyStates fightStates()
+    public virtual EnemyStates fightStates
     {
+        get
+        {
 
-        if (needToFlee()) return EnemyStates.Flee;
+            if (needToFlee) return EnemyStates.Flee;
 
-        if (isTargetInAttackRange()) return EnemyStates.Attack;
+            if (isTargetInAttackRange) return EnemyStates.Attack;
 
-        return EnemyStates.Chase;
+            return EnemyStates.Chase;
+        }
     }
 
     public virtual void OnDrawGizmos()
@@ -107,15 +131,9 @@ public class Entity : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 
-    public virtual bool needToFlee()
-    {
-        return health <= fleeHealth;
-    }
+    public virtual bool needToFlee => health <= fleeHealth;
 
-    public virtual bool hasDied()
-    {
-        return health <= 0;
-    }
+    public virtual bool hasDied => health <= 0;
 
     public virtual void ChasePlayer()
     {
@@ -124,7 +142,16 @@ public class Entity : MonoBehaviour
 
     public virtual void Attack()
     {
-        GameObject bullet = Instantiate(bulletPrefab, transform.position, currentTarget.transform.rotation);
-        bullet.GetComponent<Rigidbody2D>().AddForce(currentTarget.transform.forward * bulletSpeed, ForceMode2D.Impulse);
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * bulletSpeed, ForceMode2D.Impulse);
+    }
+
+    public virtual void RotateWeapon()
+    {
+        Vector3 diff = currentTarget.transform.position - transform.position;
+
+        diff.Normalize();
+        float rot_z = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
+        gunPrefab.transform.rotation = Quaternion.Euler(0f, 0f, rot_z - 90);
     }
 }

@@ -4,35 +4,14 @@ using UnityEngine;
 
 public class Soldier : Entity
 {
-    public override bool isTargetInAttackRange()
-    {
-        return base.isTargetInAttackRange();
-    }
+    public override bool isTargetInAttackRange => base.isTargetInAttackRange;
 
-    public override EnemyStates state()
-    {
-        return base.state();
-    }
+    public override EnemyStates state => base.state;
 
-    public override EnemyStates fightStates()
-    {
-        return base.fightStates();
-    }
-    public override bool needToFlee()
-    {
-        return base.needToFlee();
-    }
+    public override EnemyStates fightStates => base.fightStates;
+    public override bool needToFlee => base.needToFlee;
 
-    public override bool hasDied()
-    {
-        return base.hasDied();
-    }
-    public override void ChasePlayer()
-    {
-        base.ChasePlayer();
-    }
-    public override void Attack()
-    {
-        base.Attack();
-    }
+    public override bool hasDied => base.hasDied;
+    public override void ChasePlayer() => base.ChasePlayer();
+    public override void Attack() => base.Attack();
 }
