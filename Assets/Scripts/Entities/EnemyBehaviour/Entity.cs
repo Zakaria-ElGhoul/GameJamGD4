@@ -33,6 +33,8 @@ public class Entity : MonoBehaviour
     [SerializeField] float bulletCount;
     [SerializeField] float bulletSpeed;
 
+    [SerializeField] Rigidbody2D rb;
+
     [SerializeField] GameObject bulletPrefab;
 
     private RangeChecker rangeChecker;
@@ -71,7 +73,6 @@ public class Entity : MonoBehaviour
                 break;
             case EnemyStates.Attack:
                 RotateWeapon();
-
                 if (bulletCount <= 0)
                 {
                     if (Time.time > waitTime)
@@ -137,7 +138,8 @@ public class Entity : MonoBehaviour
 
     public virtual void ChasePlayer()
     {
-        transform.position = Vector2.MoveTowards(transform.position, currentTarget.transform.position, speed * Time.deltaTime);
+        Vector3 direction = (currentTarget.transform.position - transform.position).normalized;
+        rb.MovePosition(transform.position + direction * speed * Time.deltaTime);
     }
 
     public virtual void Attack()

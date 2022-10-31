@@ -9,14 +9,17 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     [SerializeField] private int minRoomWidth = 4, minRoomHeight = 4;
     [SerializeField] private int dungeonWidth = 20, dungeonHeight = 20;
     [SerializeField]
-    [Range(0,10)]
+    [Range(0, 10)]
     private int offset = 5;
     [SerializeField] private bool randomWalkRooms = false;
     [SerializeField] private GameObject cam;
     [SerializeField] private float camOffset;
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject endPoint;
-
+    [SerializeField] private List<int> roomValues = new List<int>();
+    [SerializeField] private List<GameObject> enemies = new List<GameObject>();
+    [SerializeField] private List<Vector2Int> pos = new List<Vector2Int>();
+    [SerializeField] private GameObject enemyGameObject;
     protected override void RunProceduralGeneration()
     {
         CreateRooms();
@@ -36,7 +39,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         {
             floor = CreateSimpleRooms(roomsList);
         }
-        
+
 
         List<Vector2Int> roomCenters = new List<Vector2Int>();
         foreach (var room in roomsList)
@@ -105,11 +108,11 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         corridor.Add(position);
         while (position.y != destination.y)
         {
-            if(destination.y > position.y)
+            if (destination.y > position.y)
             {
                 position += Vector2Int.up;
             }
-            else if(destination.y < position.y)
+            else if (destination.y < position.y)
             {
                 position += Vector2Int.down;
             }
@@ -121,7 +124,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             {
                 position += Vector2Int.right;
             }
-            else if(destination.x < position.x)
+            else if (destination.x < position.x)
             {
                 position += Vector2Int.left;
             }
@@ -137,7 +140,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         foreach (var position in roomCenters)
         {
             float currentDistance = Vector2.Distance(position, currentRoomCenter);
-            if(currentDistance < distance)
+            if (currentDistance < distance)
             {
                 distance = currentDistance;
                 closest = position;
@@ -149,8 +152,14 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     private HashSet<Vector2Int> CreateSimpleRooms(List<BoundsInt> roomsList)
     {
         HashSet<Vector2Int> floor = new HashSet<Vector2Int>();
+
+        roomValues.Clear();
+        enemies.Clear();
+        int sum = 0;
+
         foreach (var room in roomsList)
         {
+            roomValues.Add(Random.Range(1, 4));
             for (int col = offset; col < room.size.x - offset; col++)
             {
                 for (int row = offset; row < room.size.y - offset; row++)
@@ -158,10 +167,12 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
                     Vector2Int position = (Vector2Int)room.min + new Vector2Int(col, row);
 
                     floor.Add(position);
+
                     for (int i = 0; i < roomsList.Count; i++)
                     {
                         var roomBounds = roomsList[i];
                         var roomCenter = new Vector2Int(Mathf.RoundToInt(roomBounds.center.x), Mathf.RoundToInt(roomBounds.center.y));
+
                         if (roomsList[i] == roomsList[^1])
                         {
                             endPoint.transform.position = new Vector3(roomCenter.x, roomCenter.y, 0);
@@ -174,6 +185,23 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
                     }
                 }
             }
+        }
+
+        foreach (int value in roomValues)
+        {
+            sum += value;
+        }
+
+        for (int i = 0; i < roomsList.Count; i++)
+        {
+            var roomBounds = roomsList[i];
+            var roomCenter = new Vector2Int(Mathf.RoundToInt(roomBounds.center.x), Mathf.RoundToInt(roomBounds.center.y));
+            pos.Add(roomCenter);
+        }
+        for (int k = 0; k < sum; k++)
+        {
+            enemies.Add(enemyGameObject);
+            Instantiate(enemies[k], new Vector3(pos[k].x + Random.Range(0,1), pos[k].y + Random.Range(0, 1)), Quaternion.identity);
         }
         return floor;
     }
