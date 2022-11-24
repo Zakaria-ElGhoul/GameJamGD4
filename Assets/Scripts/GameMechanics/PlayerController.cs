@@ -2,17 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Sprite), typeof(Rigidbody2D), typeof(Collider2D))]
 public class PlayerController : MonoBehaviour
 {
-
     [Header("Player Variables")]
     [SerializeField] Sprite playerSprite;
     [SerializeField] Rigidbody2D playerRigidbody;
     [SerializeField] Collider2D playerCollider;
+    Gun gun;
     [SerializeField] float movementSpeed;
-    [SerializeField] float bulletCount;
-    [SerializeField] private float waitTime;
-    [SerializeField] public float waitForSeconds = 5f;
     [SerializeField] Transform target;
     [SerializeField] Transform inventoryTransform;
     [SerializeField] Vector3 offset;
@@ -20,11 +18,13 @@ public class PlayerController : MonoBehaviour
 
     Vector2 movement;
     bool facingRight = true;
+
     private void Start()
     {
         animator = GetComponentInChildren<Animator>();
-        waitTime = Time.time + waitForSeconds;
+        gun = GetComponentInChildren<Gun>();
     }
+
     void Update()
     {
         PlayerInput();
@@ -36,33 +36,20 @@ public class PlayerController : MonoBehaviour
     {
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
-
-        if (bulletCount <= 0)
+        if (gun.weaponSO.weaponType == WeaponTypes.Automatic)
         {
-            if (Time.time > waitTime)
+            if (Input.GetKey(KeyCode.Mouse0))
             {
-                waitTime = Time.time + waitForSeconds;
-                bulletCount = 1;
+                gun.Shoot();
             }
         }
         else
         {
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                bulletCount = 0;
-                gameObject.GetComponentInChildren<Gun>().Shoot();
+                gun.Shoot();
             }
         }
-
-        if (Input.anyKey)
-        {
-            Time.timeScale = 1.0f;
-        }
-        else
-        {
-            Time.timeScale = 0.7f;
-        }
-
         Animate();
     }
 
@@ -94,6 +81,7 @@ public class PlayerController : MonoBehaviour
         float rot_z = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
         target.rotation = Quaternion.Euler(0f, 0f, rot_z - 90);
     }
+
     void Animate()
     {
         if (movement != Vector2.zero)
@@ -105,8 +93,8 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetBool("IsWalking", false);
         }
-        animator.SetFloat("BlendX",Camera.main.ScreenToViewportPoint(Input.mousePosition).x);
-        animator.SetFloat("BlendY",Camera.main.ScreenToViewportPoint(Input.mousePosition).y);
+        animator.SetFloat("BlendX", Camera.main.ScreenToViewportPoint(Input.mousePosition).x);
+        animator.SetFloat("BlendY", Camera.main.ScreenToViewportPoint(Input.mousePosition).y);
     }
 
     void Flip()

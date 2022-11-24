@@ -20,6 +20,13 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     [SerializeField] private List<GameObject> enemies = new List<GameObject>();
     [SerializeField] private List<Vector2Int> pos = new List<Vector2Int>();
     [SerializeField] private GameObject enemyGameObject;
+
+    void Start()
+    {
+        tilemapVisualizer.Clear();
+        CreateRooms();
+    }
+
     protected override void RunProceduralGeneration()
     {
         CreateRooms();
@@ -155,6 +162,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 
         roomValues.Clear();
         enemies.Clear();
+        pos.Clear();
         int sum = 0;
 
         foreach (var room in roomsList)
@@ -201,7 +209,10 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         for (int k = 0; k < sum; k++)
         {
             enemies.Add(enemyGameObject);
-            Instantiate(enemies[k], new Vector3(pos[k].x + Random.Range(0,1), pos[k].y + Random.Range(0, 1)), Quaternion.identity);
+            int spawnPointX = Random.Range(-5, 5);
+            int spawnPointY = Random.Range(-5, 5);
+            Vector3 spawnPosition = new Vector3(spawnPointX, spawnPointY, 0);
+            Instantiate(enemies[k], new Vector3(pos[k % pos.Count].x + spawnPosition.x, pos[k % pos.Count].y + spawnPosition.y), Quaternion.identity);
         }
         return floor;
     }

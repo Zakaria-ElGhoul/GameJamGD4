@@ -45,6 +45,7 @@ public class Entity : MonoBehaviour
         currentTarget = GameObject.FindWithTag("Player");
         SetObjReference();
     }
+
     public void SetObjReference()
     {
         attackRange = enemyScriptableObject.attackRange;
@@ -64,7 +65,6 @@ public class Entity : MonoBehaviour
         fleeHealth = enemyScriptableObject.fleeHealth;
 
         currentState = state;
-        Debug.Log("State: " + currentState);
 
         switch (currentState)
         {
