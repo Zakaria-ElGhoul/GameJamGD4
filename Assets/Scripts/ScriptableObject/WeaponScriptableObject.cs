@@ -9,6 +9,7 @@ public class WeaponScriptableObject : ScriptableObject
     public string weaponName;
     public int magazineSize;
     public int ammoCapacity;
+    public int clips;
     public int burstSize;
     public float damage;
     public float fireRate;
