@@ -15,4 +15,4 @@ MonoBehaviour:
   attackRange: 5
   maxRange: 14.39
   health: 100
-  fleeHealth: 10
+  fleeHealth: 0

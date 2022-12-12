@@ -4,12 +4,19 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Entity : MonoBehaviour
+public class Entity : MonoBehaviour, IDamageable
 {
+    public virtual float Health
+    {
+        get => health;
+        set => health = value;
+    }
+
     [SerializeField] private UnityEvent ChaseState;
     [SerializeField] private UnityEvent AttackState;
     [SerializeField] private UnityEvent IdleState;
-    [SerializeField] private UnityEvent fleeState;
+
+    [SerializeField] private Enemy_ScriptableObj enemyScriptableObject;
 
     [SerializeField] private EnemyStates currentState;
 
@@ -19,11 +26,9 @@ public class Entity : MonoBehaviour
     [SerializeField] private float maxRange;
 
     [SerializeField] private float health;
-    [SerializeField] private float fleeHealth;
 
     [SerializeField] private float speed;
 
-    [SerializeField] private Enemy_ScriptableObj enemyScriptableObject;
 
     [SerializeField] GameObject gunPrefab;
     [SerializeField] Transform firePoint;
@@ -50,27 +55,21 @@ public class Entity : MonoBehaviour
     {
         attackRange = enemyScriptableObject.attackRange;
         maxRange = enemyScriptableObject.maxRange;
-
         health = enemyScriptableObject.health;
-        fleeHealth = enemyScriptableObject.fleeHealth;
+        attackRange = enemyScriptableObject.attackRange;
+        maxRange = enemyScriptableObject.maxRange;
+        health = enemyScriptableObject.health;
     }
 
     // Update is called once per frame
     void Update()
     {
-        attackRange = enemyScriptableObject.attackRange;
-        maxRange = enemyScriptableObject.maxRange;
 
-        health = enemyScriptableObject.health;
-        fleeHealth = enemyScriptableObject.fleeHealth;
 
         currentState = state;
 
         switch (currentState)
         {
-            case EnemyStates.Flee:
-                fleeState?.Invoke();
-                break;
             case EnemyStates.Attack:
                 RotateWeapon();
                 if (bulletCount <= 0)
@@ -114,9 +113,6 @@ public class Entity : MonoBehaviour
     {
         get
         {
-
-            if (needToFlee) return EnemyStates.Flee;
-
             if (isTargetInAttackRange) return EnemyStates.Attack;
 
             return EnemyStates.Chase;
@@ -132,9 +128,17 @@ public class Entity : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 
-    public virtual bool needToFlee => health <= fleeHealth;
 
-    public virtual bool hasDied => health <= 0;
+
+    public virtual void TakeDamage(float amount)
+    {
+        Health -= amount;
+
+        if (Health <= 0)
+        {
+            Destroy(this.gameObject);
+        }
+    }
 
     public virtual void ChasePlayer()
     {
