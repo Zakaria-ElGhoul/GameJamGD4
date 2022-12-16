@@ -1,7 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 public class Gun : MonoBehaviour
 {
@@ -11,35 +9,30 @@ public class Gun : MonoBehaviour
 
     public WeaponScriptableObject weaponSO;
 
-    public TMP_Text weaponNameTxt;
-    public TMP_Text weaponStatsTxt;
+    protected string weaponName;
 
-    string weaponName;
+    protected int magazineSize;
+    protected int ammoCapacity;
+    protected int clips;
+    protected int burstSize;
 
-    int magazineSize;
-    int ammoCapacity;
-    int clips;
-    int burstSize;
-    int totalAmmo;
+    [HideInInspector] public float damage;
+    protected float fireRate;
+    protected float reloadTime;
+    protected float shotSpeed;
 
-    public float damage;
-    float fireRate;
-    float reloadTime;
-    float shotSpeed;
-
-    bool isReloading;
+    protected bool isReloading;
 
     private void Start()
     {
         isReloading = false;
         SetObjReference();
-        weaponNameTxt.text = weaponName;
     }
+
     private void Update()
     {
         if (clips <= 0 && ammoCapacity <= 0)
         {
-            weaponStatsTxt.text = "OUT OF AMMO";
             return;
         }
         if (ammoCapacity <= 0 && !isReloading || Input.GetKeyDown(KeyCode.R) && !isReloading)
@@ -47,21 +40,15 @@ public class Gun : MonoBehaviour
             isReloading = true;
             StartCoroutine(Reload());
         }
-        totalAmmo = magazineSize * clips;
-        if (!isReloading)
-        {
-            weaponStatsTxt.text = ammoCapacity.ToString() + " / " + totalAmmo.ToString();
-        }
     }
 
-    public void Shoot()
+    public virtual void Shoot()
     {
         if (isReloading)
             return;
 
         if (clips <= 0 && ammoCapacity <= 0)
         {
-            weaponStatsTxt.text = "OUT OF AMMO";
             return;
         }
 
@@ -86,16 +73,15 @@ public class Gun : MonoBehaviour
     }
 
     #region IEnumerators
-    public IEnumerator Reload()
+    public virtual IEnumerator Reload()
     {
-        weaponStatsTxt.text = "Reloading...";
         yield return new WaitForSeconds(reloadTime);
         clips--;
         ammoCapacity = magazineSize;
         isReloading = false;
     }
 
-    public IEnumerator FireBurst(GameObject bulletPrefab, int burstSize, float rateOfFire)
+    public virtual IEnumerator FireBurst(GameObject bulletPrefab, int burstSize, float rateOfFire)
     {
         float bulletDelay = 60 / rateOfFire;
         // rate of fire in weapons is in rounds per minute (RPM), therefore we should calculate how much time passes before firing a new round in the same burst.
@@ -110,7 +96,7 @@ public class Gun : MonoBehaviour
     #endregion
 
     #region Setter
-    public void SetObjReference()
+    public virtual void SetObjReference()
     {
         weaponName = weaponSO.weaponName;
         magazineSize = weaponSO.magazineSize;

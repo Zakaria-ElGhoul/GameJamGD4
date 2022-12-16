@@ -72,19 +72,7 @@ public class Entity : MonoBehaviour, IDamageable
         {
             case EnemyStates.Attack:
                 RotateWeapon();
-                if (bulletCount <= 0)
-                {
-                    if (Time.time > waitTime)
-                    {
-                        waitTime = Time.time + waitForSeconds;
-                        bulletCount = 1;
-                    }
-                }
-                else
-                {
-                        bulletCount = 0;
-                        AttackState?.Invoke();
-                }
+                AttackState?.Invoke();
                 break;
             case EnemyStates.Chase:
                 ChaseState?.Invoke();
@@ -148,8 +136,7 @@ public class Entity : MonoBehaviour, IDamageable
 
     public virtual void Attack()
     {
-        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * bulletSpeed, ForceMode2D.Impulse);
+
     }
 
     public virtual void RotateWeapon()
