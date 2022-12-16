@@ -167,7 +167,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 
         foreach (var room in roomsList)
         {
-            randomEnemySpawnCount.Add(Random.Range(1, 6));
+            randomEnemySpawnCount.Add(Random.Range(1, 7));
 
             for (int col = offset; col < room.size.x - offset; col++)
             {
