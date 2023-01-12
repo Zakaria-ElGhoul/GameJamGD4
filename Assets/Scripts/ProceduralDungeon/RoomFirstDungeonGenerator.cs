@@ -6,20 +6,46 @@ using Random = UnityEngine.Random;
 
 public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 {
-    [SerializeField] private int minRoomWidth = 4, minRoomHeight = 4;
-    [SerializeField] private int dungeonWidth = 20, dungeonHeight = 20;
-    [SerializeField]
-    [Range(0, 10)]
-    private int offset = 5;
+    [Space(10)]
+    [Range(4, 400)][SerializeField] private int minRoomWidth = 4;
+    [Range(4, 400)][SerializeField] private int minRoomHeight = 4;
+
+    [Space(10)]
+    [Range(20, 1000)][SerializeField] private int dungeonWidth = 20;
+    [Range(4, 1000)][SerializeField] private int dungeonHeight = 20;
+
+    [Space(10)]
+    [Range(1, 10)][SerializeField] private int minEnemySpawnCount = 2;
+    [Range(1, 10)][SerializeField] private int maxEnemySpawnCount = 3;
+
+    [Space(10)]
+    [Range(0, 10)][SerializeField] private int offset = 5;
+
+    [Space(10)]
+    [SerializeField] private Vector2Int dungeonCorridorWidthOffset;
+
+    [Space(10)]
     [SerializeField] private bool randomWalkRooms = false;
-    [SerializeField] private GameObject cam;
-    [SerializeField] private float camOffset;
+
+    [Space(10)]
+    [Header("GameObject References")]
+    [Space(10)]
+    [SerializeField] private GameObject[] enemyGameObject;
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject endPoint;
+
+    [Space(10)]
+    [Header("Camera Variables")]
+    [Space(10)]
+    [SerializeField] private GameObject cam;
+    [SerializeField] private float camOffset;
+
+    [Space(10)]
+    [Header("Enemy Data")]
+    [Space(10)]
     [SerializeField] private List<int> randomEnemySpawnCount = new List<int>();
     [SerializeField] private List<GameObject> enemies = new List<GameObject>();
     [SerializeField] private List<Vector2Int> pos = new List<Vector2Int>();
-    [SerializeField] private GameObject enemyGameObject;
 
     void Start()
     {
@@ -102,8 +128,10 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             Vector2Int closest = FindClosestPointTo(currentRoomCenter, roomCenters);
             roomCenters.Remove(closest);
             HashSet<Vector2Int> newCorridor = CreateCorridor(currentRoomCenter, closest);
+            HashSet<Vector2Int> newCorridor1 = CreateCorridor(currentRoomCenter + dungeonCorridorWidthOffset, closest + dungeonCorridorWidthOffset);
             currentRoomCenter = closest;
             corridors.UnionWith(newCorridor);
+            corridors.UnionWith(newCorridor1);
         }
         return corridors;
     }
@@ -163,11 +191,12 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         randomEnemySpawnCount.Clear();
         enemies.Clear();
         pos.Clear();
+
         int sum = 0;
 
         foreach (var room in roomsList)
         {
-            randomEnemySpawnCount.Add(Random.Range(1, 7));
+            randomEnemySpawnCount.Add(Random.Range(minEnemySpawnCount, maxEnemySpawnCount));
 
             for (int col = offset; col < room.size.x - offset; col++)
             {
@@ -207,23 +236,17 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             var roomBounds = roomsList[i];
             var roomCenter = new Vector2Int(Mathf.RoundToInt(roomBounds.center.x), Mathf.RoundToInt(roomBounds.center.y));
 
-            // adding the position of the middle of the room
-            pos.Add(roomCenter);
-
-            // remove the enemies from the Start Point
-            if (roomsList[i] == roomsList[^1])
+            // adding the position of the middle of the room, unless it is the first or last room
+            if (roomsList[i] != roomsList[^1] && roomsList[i] != roomsList[1])
             {
-                pos.Remove(roomCenter);
-            }
-            else if (roomsList[i] == roomsList[1])
-            {
-                pos.Remove(roomCenter);
+                pos.Add(roomCenter);
             }
         }
+
         for (int k = 0; k < sum; k++)
         {
             //Adding the enemies to a list to keep count on them
-            enemies.Add(enemyGameObject);
+            enemies.Add(enemyGameObject[Random.Range(0, enemyGameObject.Length - 1)]);
 
             //Adding a random offset per enemy, had to convert from a Vector 2 to 3 because instantiating gets done with a vector 3
             int spawnPointXOffset = Random.Range(-5, 5);
