@@ -5,6 +5,7 @@ public class CameraMovement : MonoBehaviour
     //Camera Movement
     public Transform player;
     Vector3 target, mousePos, shakeOffset;
+
     Vector3 refVel = Vector3.zero;
     float cameraDistance = 3.5f;
     public float smoothTime = 0.3f, zStart;

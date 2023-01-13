@@ -17,4 +17,19 @@ public class NextLevel : MonoBehaviour
     {
         SceneManager.LoadScene(sceneIndex);
     }
+    public GameManager manager;
+
+    private void Awake()
+    {
+        manager = GameManager.instance;
+    }
+    public void PlayGame()
+    {
+        manager.LoadGame();
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
 }

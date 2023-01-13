@@ -6,6 +6,8 @@ using Random = UnityEngine.Random;
 
 public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 {
+    public static RoomFirstDungeonGenerator current;
+
     [Space(10)]
     [Range(4, 400)][SerializeField] private int minRoomWidth = 4;
     [Range(4, 400)][SerializeField] private int minRoomHeight = 4;
@@ -46,6 +48,14 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     [SerializeField] private List<int> randomEnemySpawnCount = new List<int>();
     [SerializeField] private List<GameObject> enemies = new List<GameObject>();
     [SerializeField] private List<Vector2Int> pos = new List<Vector2Int>();
+    [SerializeField] private int sum;
+    [SerializeField] public float progress;
+    [SerializeField] public bool isDone;
+
+    void Awake()
+    {
+        current = this;
+    }
 
     void Start()
     {
@@ -192,11 +202,9 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         enemies.Clear();
         pos.Clear();
 
-        int sum = 0;
-
         foreach (var room in roomsList)
         {
-            randomEnemySpawnCount.Add(Random.Range(minEnemySpawnCount, maxEnemySpawnCount));
+            randomEnemySpawnCount.Add(Random.Range(minEnemySpawnCount, maxEnemySpawnCount + 1));
 
             for (int col = offset; col < room.size.x - offset; col++)
             {
@@ -243,7 +251,14 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             }
         }
 
-        for (int k = 0; k < sum; k++)
+        StartCoroutine(SpawnEnemies());
+
+        return floor;
+    }
+    IEnumerator SpawnEnemies()
+    {
+        int k = 0;
+        while (k < sum)
         {
             //Adding the enemies to a list to keep count on them
             enemies.Add(enemyGameObject[Random.Range(0, enemyGameObject.Length - 1)]);
@@ -255,7 +270,14 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 
             //Instatiating all the enemies
             Instantiate(enemies[k], new Vector3(pos[k % pos.Count].x + spawnPosition.x, pos[k % pos.Count].y + spawnPosition.y), Quaternion.identity);
+            yield return new WaitForSeconds(0f);
+
+            progress = ((float)k / (float)sum);
+
+            k++;
         }
-        return floor;
+        yield return new WaitForSeconds(0.5f);
+
+        isDone= true;
     }
 }
